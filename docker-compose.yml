@@ -4,12 +4,13 @@ services:
     kokserek:
         build: ./kokserek
         volumes:
-        - .:/usr/src/app
+          - .:/usr/src/app
+          - ./kokserek/staticfiles:/usr/src/app/staticfiles
         depends_on:
           - postgres
         expose:
           - "8000"
-        command: bash -c "cd /usr/src/app/kokserek && ./manage.py migrate &&  gunicorn kokserek.wsgi -b 0.0.0.0:8000"
+        command: bash -c "cd /usr/src/app/kokserek && ./manage.py migrate && ./manage.py collectstatic --noinput &&  gunicorn kokserek.wsgi -b 0.0.0.0:8000"
         env_file: .env
 
     postgres:
@@ -30,5 +31,6 @@ services:
           - kokserek
         volumes:
           - ./nginx/default.conf:/etc/nginx/sites-available/default
+          - ./kokserek/staticfiles:/data/django/static
 volumes:
     pgdata:
