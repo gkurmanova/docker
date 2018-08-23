@@ -1,36 +1,36 @@
-version: '2'
+version: '3.5'
 services:
 
     kokserek:
-
         build: ./kokserek
         volumes:
-        - ./kokserek:/usr/src/app
+          - .:/usr/src/app
+          - ./kokserek/staticfiles:/usr/src/app/staticfiles
         depends_on:
           - postgres
         expose:
           - "8000"
-        command: gunicorn kokserek.wsgi -b 0.0.0.0:8000
+        command: bash -c "cd /usr/src/app/kokserek && ./manage.py migrate && ./manage.py collectstatic --noinput &&  gunicorn kokserek.wsgi -b 0.0.0.0:8000"
+        env_file: .env
 
     postgres:
-
         image: postgres:latest
         restart: unless-stopped
-        expose:
-            - "5432"
-
-        env_file: ./.env  # not needed if you have it set in your project/settings.py
-
+        env_file: .env
         volumes:
-            - pgdata:/var/lib/postgresql/data/  # persist container's db data to local pgdata/ (mounted)
+            - pgdata:/var/lib/postgresql/data
 
     nginx:
         restart: always
-        build: ./nginx/
+        command: bash -c "service nginx start && tail -f /dev/null"
+        build:
+            context: ./nginx/
         ports:
-          - "8000:80"
-        links:
-          - web
-
+          - "80:80"
+        depends_on:
+          - kokserek
+        volumes:
+          - ./nginx/default.conf:/etc/nginx/sites-available/default
+          - ./kokserek/staticfiles:/data/django/static
 volumes:
-  pgdata:
+    pgdata:

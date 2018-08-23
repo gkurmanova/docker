@@ -1,4 +1,7 @@
-FROM nginx
+FROM ubuntu:latest
 
-# Copy configuration files to the container
-COPY default.conf /etc/nginx/conf.d/default.conf
+RUN apt-get update
+RUN apt-get install -y software-properties-common
+RUN add-apt-repository ppa:certbot/certbot
+RUN apt-get update
+RUN apt-get install -y nginx
