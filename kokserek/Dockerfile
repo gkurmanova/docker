@@ -8,4 +8,3 @@ COPY requirements.txt ./
 RUN pip install --no-cache-dir -r requirements.txt
 
 # copy current dir's content to container's WORKDIR root i.e. all the contents of the web app
-COPY . .
